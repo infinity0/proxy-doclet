@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <project name="blikidoclet" default="dist" basedir=".">
+	<property file="src/info/bliki/doclet/src.properties" prefix="src"/>
 
 	<target name="mkdir">
 		<mkdir dir="build"/>
@@ -19,12 +20,12 @@
 	</target>
 
 	<target name="jar" depends="compile">
-		<jar jarfile="dist/bliki-doclet.jar" duplicate="fail">
+		<jar jarfile="dist/bliki-doclet+${src.base}.jar" duplicate="fail">
 			<fileset dir="build/"/>
 			<fileset dir="src/" casesensitive="no">
 				<include name="**/*.properties"/>
 			</fileset>
-			<zipgroupfileset dir="lib/" includes="*.jar"/>
+			<zipgroupfileset dir="lib/" includes="**/*.jar"/>
 		</jar>
 	</target>
 

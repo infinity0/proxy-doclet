@@ -2,7 +2,7 @@
 if [ -z "$1" ]; then echo "give the source path"; exit 2; fi;
 
 DOCLET=src/info/bliki/doclet
-mkdir -p "$DOCLET"
+rm -rf "$DOCLET" && mkdir -p "$DOCLET"
 mkdir -p "$DOCLET/internal/toolkit"
 cp -R "$1/com/sun/tools/doclets/formats" "$DOCLET" || exit $?
 cp -R "$1/com/sun/tools/doclets/standard" "$DOCLET" || exit $?
@@ -111,6 +111,10 @@ EOF
 find src -type f | xargs perl -pi -e 's/com.sun.tools.doclets.formats/info.bliki.doclet.formats/g'
 find src -type f | xargs perl -pi -e 's/com.sun.tools.doclets.standard/info.bliki.doclet.standard/g'
 find src -type f | xargs perl -pi -e 's/info.bliki.doclet.formats.html.resources.standard/com.sun.tools.doclets.formats.html.resources.standard/g'
-cat > "$DOCLET/README" <<EOF
-Source automatically generated from $1 by bliki-doclet.mksrc on $(date)
+cat > "$DOCLET/src.properties" <<EOF
+# Source automatically generated from $1
+# by bliki-doclet.mksrc on $(date)
+path=$1
+base=$(basename "$1")
+dir=$(dirname "$1")
 EOF
