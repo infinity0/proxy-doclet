@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<project name="blikidoclet" default="dist" basedir=".">
+
+	<target name="mkdir">
+		<mkdir dir="build"/>
+		<mkdir dir="dist"/>
+	</target>
+
+	<target name="compile" depends="mkdir">
+		<tstamp/>
+		<javac srcdir="src" destdir="build" debug="on" optimize="on">
+			<classpath>
+				<fileset dir="lib/">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar jarfile="dist/bliki-doclet.jar" duplicate="fail">
+			<fileset dir="build/"/>
+			<fileset dir="src/" casesensitive="no">
+				<include name="**/*.properties"/>
+			</fileset>
+			<zipgroupfileset dir="lib/" includes="*.jar"/>
+		</jar>
+	</target>
+
+	<target name="dist" depends="clean,jar"/>
+
+	<target name="clean">
+		<delete dir="build"/>
+		<delete dir="dist"/>
+	</target>
+
+</project>

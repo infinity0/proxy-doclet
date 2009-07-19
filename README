@@ -1,0 +1,29 @@
+Standard Java Doclet with bliki grafted onto it
+
+bliki: http://code.google.com/p/gwtwiki/
+
+by infinity0
+
+docs and license details to come later.
+basically it's GPL 2 as Sun's released it
+
+== Build ==
+
+You will need to place the bliki-core jar (see above link) in lib/ first.
+Then, depending on which Java version you have installed:
+
+Java 6:
+
+$ ./mksrc.sh src.orig/openjdk-6-src-b16-24_apr_2009/ && ant
+
+Java 7:
+
+$ ./mksrc.sh src.orig/openjdk-7-ea-src-b65-16_jul_2009/ && ant
+
+== Use ==
+
+Ant:
+
+<javadoc>
+	<doclet name="info.bliki.doclet.standard.Standard" path="${lib}/bliki-doclet.jar"/>
+</javadoc>
