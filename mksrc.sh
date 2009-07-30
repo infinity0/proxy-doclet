@@ -68,18 +68,18 @@ patch -p0 << EOF
       * Relative path from the file getting generated to the destination
       * directory. For example, if the file getting generated is
       * "java/lang/Object.html", then the relative path string is "../../".
-@@ -1494,7 +1544,10 @@
-                 result.append(textBuff);
-             }
+@@ -1427,7 +1477,10 @@
+         if (depr) {
+             italic();
          }
--        return result.toString();
-+        String s = wiki.render(preprocessWikiString(result.toString()));
+-        String result = commentTagsToString(null, doc, tags, first);
++        String s = wiki.render(preprocessWikiString(commentTagsToString(null, doc, tags, first)));
 +        // strip <p> tags from single-line comments
-+        return (s.lastIndexOf("<p>") == 1 && s.startsWith("\n<p>") && s.endsWith("</p>"))? "\n" + s.substring(4, s.length()-4): s;
-+        //return preprocessWikiString(result.toString());
-     }
- 
-     /**
++        String result = (s.lastIndexOf("<p>") == 1 && s.startsWith("\n<p>") && s.endsWith("</p>"))?
++                        "\n" + s.substring(4, s.length()-4): s;
+         print(result);
+         if (depr) {
+             italicEnd();
 --- src/info/bliki/doclet/internal/toolkit/AbstractDoclet.java	2009-07-18 18:59:17.000000000 +0100
 +++ src/info/bliki/doclet/internal/toolkit/AbstractDoclet.java	2009-07-18 18:18:54.000000000 +0100
 @@ -23,10 +23,11 @@
