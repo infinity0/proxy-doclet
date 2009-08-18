@@ -9,7 +9,7 @@
 +    public info.bliki.wiki.model.WikiModel wiki = new info.bliki.wiki.model.WikiModel("", "");
 +
 +    public String preprocessWikiString(String b) {
-+        String lines[] = b.split("\\\\n");
++        String lines[] = b.split("\\n");
 +        int indent=Integer.MAX_VALUE;
 +        // find smallest indent in the first 4 non-blank lines, excl the first line
 +        // whose indent is discarded by javadoc
