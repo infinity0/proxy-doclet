@@ -13,18 +13,22 @@ Then, depending on which Java version you have installed:
 
 Java 6:
 
-$ ./mksrc.sh src.orig/openjdk-6-src-b16-24_apr_2009/ && ant
+$ ant -Djdk=6
 
 Java 7:
 
-$ ./mksrc.sh src.orig/openjdk-7-ea-src-b65-16_jul_2009/ && ant
+$ ant -Djdk=7
+
+Custom path to Standard Java Doclet source files:
+
+$ ant -Dsrc.orig=/path/to/source
 
 == Use ==
 
 Ant:
 
 <javadoc>
-	<doclet name="info.bliki.doclet.standard.Standard" path="${lib}/bliki-doclet.jar"/>
+	<doclet name="info.bliki.doclet.standard.Standard" path="${doc}/bliki-doclet.jar"/>
 </javadoc>
 
 == About ==

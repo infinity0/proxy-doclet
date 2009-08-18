@@ -1,13 +1,50 @@
 <?xml version="1.0"?>
 <project name="blikidoclet" default="dist" basedir=".">
-	<property file="src/info/bliki/doclet/src.properties" prefix="src"/>
+	<!--<property file="src/info/bliki/doclet/src.properties" prefix="src"/>-->
+	<property name="src.home" value="src/info/bliki/doclet"/>
 
 	<target name="mkdir">
 		<mkdir dir="build"/>
 		<mkdir dir="dist"/>
 	</target>
 
-	<target name="compile" depends="mkdir">
+	<condition property="src.orig" value="src.orig/openjdk-6-src-b16-24_apr_2009/">
+		<equals arg1="${jdk}" arg2="6"/>
+	</condition>
+
+	<condition property="src.orig" value="src.orig/openjdk-7-ea-src-b65-16_jul_2009/">
+		<equals arg1="${jdk}" arg2="7"/>
+	</condition>
+
+	<target name="mksrc">
+		<delete dir="${src.home}"/>
+		<mkdir dir="${src.home}"/>
+		<copy todir="${src.home}">
+			<fileset dir="${src.orig}/com/sun/tools/doclets/">
+				<include name="formats/**/*"/>
+				<include name="standard/**/*"/>
+				<include name="internal/toolkit/AbstractDoclet.java"/>
+			</fileset>
+		</copy>
+		<patch patchfile="bliki-specifics.diff" strip="0" />
+		<replace dir="${src.home}" summary="true">
+			<replacefilter token="com.sun.tools.doclets.formats" value="info.bliki.doclet.formats"/>
+			<replacefilter token="com.sun.tools.doclets.standard" value="info.bliki.doclet.standard"/>
+			<replacefilter token="info.bliki.doclet.formats.html.resources.standard" value="com.sun.tools.doclets.formats.html.resources.standard"/>
+		</replace>
+		<tstamp>
+			<format property="src.tstamp" pattern="yyyy-MM-dd HH:mm:ssZ"/>
+		</tstamp>
+		<basename property="src.base" file="${src.orig}"/>
+		<dirname property="src.dir" file="${src.orig}"/>
+		<echo file="${src.home}/src.properties"># Source automatically generated from ${src.orig}${line.separator}</echo>
+		<echo file="${src.home}/src.properties" append="true"># by bliki-doclet.mksrc on ${src.tstamp}${line.separator}</echo>
+		<echo file="${src.home}/src.properties" append="true">path=${src.orig}${line.separator}</echo>
+		<echo file="${src.home}/src.properties" append="true">base=${src.base}${line.separator}</echo>
+		<echo file="${src.home}/src.properties" append="true">dir=${src.dir}${line.separator}</echo>
+	</target>
+
+	<target name="compile" depends="mkdir, mksrc">
 		<tstamp/>
 		<javac srcdir="src" destdir="build" debug="on" optimize="on">
 			<classpath>
