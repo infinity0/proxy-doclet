@@ -7,6 +7,52 @@ import proxy.adapters.MarkupRenderer;
 ** {@link MarkupRenderer} that uses bliki-wiki to render MediaWiki markup in
 ** javadoc comments to HTML.
 **
+** It does some pre-processing first, though. Since paragraphs in javadoc comments
+** are normally broken into lines using actual new-line characters, and since
+** MediaWiki syntax has special semantics for lines that are incompatible this, the
+** plaintext comments are first pre-processed to remove some of the line breaks
+** (and some indent spaces) before passing it through the rendering engine.
+**
+** The algorithm is (omitting treatment of corner cases):
+** - The "global indent" is calculated for the entire comment string; this is
+**   stripped from all lines.
+** - Each empty line starts a new paragraph. All lines in a paragraph are merged
+**   together into a single line, except some special cases, depending on the type
+**   of paragraph, which is determined by the first character after the global
+**   indent, on the first line.
+** - If the paragraph type is "text", all lines are merged.
+** - If the paragraph type is "symbol", all lines are merged, except for lines
+**   which start with that same symbol (lists, etc, in wiki syntax)
+** - If the paragraph type is "space", all lines are merged, except for lines
+**   which start with a space (preformatted text in wiki syntax)
+**
+** This results in some changes from the usual MediaWiki syntax. For example, you
+** don't have to have to fit a list item on a single line; and you can indent it
+** as you wish:
+**
+** * This is a list item
+**   and this is still the same
+**   item as the previous lines
+** * This is a new item
+**
+** However, a more negative side effect is that you can't break up paragraphs with
+** only a new entity (eg. an unordered list) - you must have an empty line to
+** separate them, otherwise the pre-processor will concatenate the two lines and
+** the rendering engine will see it as a single line. For example:
+**
+** Lorem ipsum dolor sit amet.
+**
+** * This is a list item
+**
+** not
+**
+** Lorem ipsum dolor sit amet.
+** * This is a list item
+**
+** I've done it this way because it seems more natural; if you think otherwise, or
+** if you have a better algorithm than the one stated, feel free to contact me with
+** details of your thoughts.
+**
 ** @author infinity0
 */
 public class MediaWikiRenderer implements MarkupRenderer {

@@ -1,13 +1,40 @@
-Standard Java Doclet with bliki grafted onto it
+proxy-doclet
 by infinity0 <infinity0@freenetproject.org>
-
-Standard Java Doclet: http://java.sun.com/j2se/javadoc/
-bliki engine: http://code.google.com/p/gwtwiki/
 
 license is GPL 2 with Sun's classpath exception, as described in LICENSE
 
-You will need to place the bliki-core jar (see above link) in lib/ first.
-Then, depending on which Java version you have installed:
+This package implements some patches to Sun's Standard Java Doclet to attach
+various hooks to certain operations, and allow the user to specify custom
+actions to modify the operation of the doclet.
+
+So far, the supported hooks are:
+
+- when rendering the javadoc comment text to HTML
+
+and the supported actions are:
+
+- render the text as MediaWiki markup
+- render the text as pandoc markdown (TODO)
+
+I originally wanted a doclet that could allow me to use MediaWiki syntax in
+javadoc comments, because having to type <p> everywhere is tedious and ugly.
+Many people have implemented doclets that do similar ideas, but most of these
+revolved around copying and editing the source for the Standard Java Doclet.
+
+This isn't flexible or extensible, and I've taken a different approach here. I
+do modify the Standard Java Doclet, but only in a minimal way, and the rest of
+the extended functionality is implemented in separate adapter classes. OOP
+after all, is supposed to increase reusability and modularity.
+
+The major advantage with this approach is that it's very easy to add new
+features, such as support for different markup languages, and potentially add
+hooks to other parts of the operation of the doclet.
+
+== Dependencies ==
+
+Put these in lib/:
+
+* bliki-core.jar http://code.google.com/p/gwtwiki/
 
 == Build ==
 
@@ -28,57 +55,6 @@ $ ant -Dsrc.orig=/path/to/source
 Ant:
 
 <javadoc>
-	<doclet name="info.bliki.doclet.standard.Standard" path="${doc}/bliki-doclet.jar"/>
+	<doclet name="proxy.doclets.standard.Standard" path="path/to/proxy-doclet.jar"/>
 </javadoc>
 
-== About ==
-
-Short story: the doclet passes the plaintext comments from the standard doclet
-through the bliki syntax engine before inserting them into the documentation
-page.
-
-Long story: since paragraphs in javadoc comments are normally broken into lines
-using actual new-line characters, and since MediaWiki syntax has special
-semantics for lines that are incompatible this, the plaintext comments are first
-pre-processed to remove some of the line breaks (and some indent spaces) before
-passing it through the rendering engine.
-
-The algorithm is (omitting treatment of corner cases):
-- The "global indent" is calculated for the entire comment string; this is
-  stripped from all lines.
-- Each empty line starts a new paragraph. All lines in a paragraph are merged
-  together into a single line, except some special cases, depending on the type
-  of paragraph, which is determined by the first character after the global
-  indent, on the first line.
-- If the paragraph type is "text", all lines are merged.
-- If the paragraph type is "symbol", all lines are merged, except for lines
-  which start with that same symbol (lists, etc, in wiki syntax)
-- If the paragraph type is "space", all lines are merged, except for lines
-  which start with a space (preformatted text in wiki syntax)
-
-This results in some changes from the usual MediaWiki syntax. For example, you
-don't have to have to fit a list item on a single line; and you can indent it
-as you wish:
-
-* This is a list item
-  and this is still the same
-  item as the previous lines
-* This is a new item
-
-However, a more negative side effect is that you can't break up paragraphs with
-only a new entity (eg. an unordered list) - you must have an empty line to
-separate them, otherwise the pre-processor will concatenate the two lines and
-the rendering engine will see it as a single line. For example:
-
-Lorem ipsum dolor sit amet.
-
-* This is a list item
-
-not
-
-Lorem ipsum dolor sit amet.
-* This is a list item
-
-I've done it this way because it seems more natural; if you think otherwise, or
-if you have a better algorithm than the one stated, feel free to contact me with
-details of your thoughts.
