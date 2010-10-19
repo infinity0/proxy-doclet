@@ -4,6 +4,9 @@ import info.bliki.wiki.model.WikiModel;
 import proxy.adapters.MarkupRenderer;
 
 /**
+** {@link MarkupRenderer} that uses bliki-wiki to render MediaWiki markup in
+** javadoc comments to HTML.
+**
 ** @author infinity0
 */
 public class MediaWikiRenderer implements MarkupRenderer {

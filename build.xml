@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="proxy-doclet" default="dist" basedir=".">
+<project name="proxy-doclet" default="all" basedir=".">
 
 	<property name="main.src" value="src"/>
 	<property name="main.bsrc" value="build/src"/>
@@ -17,18 +17,13 @@
 	<property name="tmp" value="tmp"/>
 	<property name="lib" value="lib"/>
 
-	<condition property="src.orig" value="src.orig/openjdk-6-src-b16-24_apr_2009/">
-		<equals arg1="${jdk}" arg2="6"/>
-	</condition>
-
-	<condition property="src.orig" value="src.orig/openjdk-7-ea-src-b65-16_jul_2009/">
-		<equals arg1="${jdk}" arg2="7"/>
-	</condition>
-
-	<basename property="src.base" file="${src.orig}"/>
-	<dirname property="src.dir" file="${src.orig}"/>
-	<property name="src.home" value="proxy/doclet"/>
-
+	<property name="doclet.package" value="proxy/doclets"/>
+	<condition property="doclet.orig" value="src.orig/openjdk-6-src-b16-24_apr_2009/">
+		<equals arg1="${jdk}" arg2="6"/></condition>
+	<condition property="doclet.orig" value="src.orig/openjdk-7-ea-src-b65-16_jul_2009/">
+		<equals arg1="${jdk}" arg2="7"/></condition>
+	<basename property="doclet.base" file="${doclet.orig}"/>
+	<dirname property="doclet.dir" file="${doclet.orig}"/>
 
 	<!-- =================================================================== -->
 	<!-- Miscellaneous                                                       -->
@@ -38,7 +33,7 @@
 
 	<target name="all" depends="package" description="build everything"/>
 
-	<target name="clean-all" depends="clean" description="clean all build products *and dependencies* (ext, gjs)"/>
+	<target name="clean-all" depends="clean" description="clean all build products"/>
 
 	<!-- =================================================================== -->
 	<!-- Standard build                                                      -->
@@ -51,37 +46,37 @@
 	</target>
 
 	<target name="build-src" depends="init" description="build the source code for the entire package">
-		<delete dir="${main.bsrc}/${src.home}"/>
-		<mkdir dir="${main.bsrc}/${src.home}"/>
-		<copy todir="${main.bsrc}/${src.home}">
-			<fileset dir="${src.orig}/com/sun/tools/doclets/">
+		<property name="doclet.home" value="${main.bsrc}/${doclet.package}"/>
+		<delete dir="${doclet.home}"/>
+		<mkdir dir="${doclet.home}"/>
+		<copy todir="${doclet.home}">
+			<fileset dir="${doclet.orig}/com/sun/tools/doclets/">
 				<include name="formats/**/*"/>
 				<include name="standard/**/*"/>
 				<include name="internal/toolkit/AbstractDoclet.java"/>
 			</fileset>
-			<fileset dir="${main.src}">
-				<include name="**/*"/>
-			</fileset>
 		</copy>
-		<patch dir="${main.bsrc}" patchfile="proxy-doclet.diff" strip="1" />
-		<replace dir="${main.bsrc}/${src.home}" summary="true">
-			<replacefilter token="com.sun.tools.doclets.formats" value="proxy.doclet.formats"/>
-			<replacefilter token="com.sun.tools.doclets.standard" value="proxy.doclet.standard"/>
-			<replacefilter token="proxy.doclet.formats.html.resources.standard" value="com.sun.tools.doclets.formats.html.resources.standard"/>
+		<patch dir="${doclet.home}" patchfile="proxy-doclet.diff" strip="0" />
+		<replace dir="${doclet.home}" summary="true">
+			<replacefilter token="com.sun.tools.doclets.formats" value="proxy.doclets.formats"/>
+			<replacefilter token="com.sun.tools.doclets.standard" value="proxy.doclets.standard"/>
+			<replacefilter token="proxy.doclets.formats.html.resources.standard" value="com.sun.tools.doclets.formats.html.resources.standard"/>
 		</replace>
 		<tstamp>
 			<format property="src.tstamp" pattern="yyyy-MM-dd HH:mm:ssZ"/>
 		</tstamp>
-		<echo file="${main.bsrc}/${src.home}/src.properties"># Source automatically generated from ${src.orig}${line.separator}</echo>
-		<echo file="${main.bsrc}/${src.home}/src.properties" append="true"># by proxy-doclet.mksrc on ${src.tstamp}${line.separator}</echo>
-		<echo file="${main.bsrc}/${src.home}/src.properties" append="true">path=${src.orig}${line.separator}</echo>
-		<echo file="${main.bsrc}/${src.home}/src.properties" append="true">base=${src.base}${line.separator}</echo>
-		<echo file="${main.bsrc}/${src.home}/src.properties" append="true">dir=${src.dir}${line.separator}</echo>
+		<echo file="${doclet.home}/src.properties"># Source automatically generated from ${doclet.orig}${line.separator}</echo>
+		<echo file="${doclet.home}/src.properties" append="true"># by proxy-doclet.build-src on ${src.tstamp}${line.separator}</echo>
+		<echo file="${doclet.home}/src.properties" append="true">path=${doclet.orig}${line.separator}</echo>
+		<echo file="${doclet.home}/src.properties" append="true">base=${doclet.base}${line.separator}</echo>
+		<echo file="${doclet.home}/src.properties" append="true">dir=${doclet.dir}${line.separator}</echo>
 	</target>
 
 	<target name="build" depends="build-src">
 		<tstamp/>
-		<javac srcdir="${main.bsrc}" destdir="${main.make}" debug="on" optimize="on">
+		<javac destdir="${main.make}" debug="on" optimize="on">
+			<src path="${main.bsrc}"/>
+			<src path="${main.src}"/>
 			<classpath>
 				<fileset dir="${lib}">
 					<include name="**/*.jar"/>
@@ -92,7 +87,7 @@
 	</target>
 
 	<target name="package" depends="build">
-		<jar jarfile="dist/proxy-doclet+${src.base}.jar" duplicate="fail">
+		<jar jarfile="${main.dst}/proxy-doclet+${doclet.base}.jar" duplicate="fail">
 			<fileset dir="${main.make}"/>
 			<fileset dir="${main.bsrc}/" casesensitive="no">
 				<include name="**/*.properties"/>
