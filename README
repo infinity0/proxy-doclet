@@ -13,12 +13,12 @@ So far, the supported hooks are:
 
 and the supported actions are:
 
-- render the text as MediaWiki markup
-- render the text as pandoc markdown (TODO)
+- parse the text as MediaWiki markup
+- parse the text as pandoc markdown (TODO)
 
 I originally wanted a doclet that could allow me to use MediaWiki syntax in
 javadoc comments, because having to type <p> everywhere is tedious and ugly.
-Many people have implemented doclets that do similar ideas, but most of these
+Many people have implemented doclets that do similar things, but most of these
 revolved around copying and editing the source for the Standard Java Doclet.
 
 This isn't flexible or extensible, and I've taken a different approach here. I

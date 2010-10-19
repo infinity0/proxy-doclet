@@ -16,6 +16,9 @@
 
 	<property name="tmp" value="tmp"/>
 	<property name="lib" value="lib"/>
+	<path id="lib.path">
+		<fileset dir="${lib}" includes="**/*.jar"/>
+	</path>
 
 	<property name="doclet.package" value="proxy/doclets"/>
 	<condition property="doclet.orig" value="src.orig/openjdk-6-src-b16-24_apr_2009/">
@@ -31,9 +34,9 @@
 
 	<target name="dist" depends="clean-all, all" description="clean-build everything"/>
 
-	<target name="all" depends="package" description="build everything"/>
+	<target name="all" depends="package, doc" description="build everything"/>
 
-	<target name="clean-all" depends="clean" description="clean all build products"/>
+	<target name="clean-all" depends="clean, clean-doc" description="clean all build products"/>
 
 	<!-- =================================================================== -->
 	<!-- Standard build                                                      -->
@@ -100,6 +103,30 @@
 		<delete dir="${main.make}"/>
 		<delete dir="${main.bsrc}"/>
 		<delete dir="${main.dst}"/>
+	</target>
+
+	<!-- =================================================================== -->
+	<!-- Documentation                                                       -->
+	<!-- =================================================================== -->
+
+	<target name="init-doc">
+		<mkdir dir="${doc.api}"/>
+	</target>
+
+	<target name="javadoc" depends="init-doc, package">
+		<javadoc classpathref="lib.path" sourcepath="${main.src}" destdir="${doc.api}" use="true">
+			<doclet name="proxy.doclets.standard.Standard" path="${main.dst}/proxy-doclet+${doclet.base}.jar"/>
+			<fileset dir="${main.src}" includes="**/*.java" />
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
+		</javadoc>
+	</target>
+
+	<target name="doc" depends="javadoc" description="build documentation">
+		<!-- currently, no other documentation apart from javadocs -->
+	</target>
+
+	<target name="clean-doc">
+		<delete dir="${doc.api}"/>
 	</target>
 
 </project>

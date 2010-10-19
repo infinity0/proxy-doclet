@@ -1,7 +1,9 @@
 package proxy.adapters.markup;
 
-import info.bliki.wiki.model.WikiModel;
 import proxy.adapters.MarkupRenderer;
+import proxy.adapters.Markup;
+
+import info.bliki.wiki.model.WikiModel;
 
 /**
 ** {@link MarkupRenderer} that uses bliki-wiki to render MediaWiki markup in
@@ -14,6 +16,7 @@ import proxy.adapters.MarkupRenderer;
 ** (and some indent spaces) before passing it through the rendering engine.
 **
 ** The algorithm is (omitting treatment of corner cases):
+**
 ** - The "global indent" is calculated for the entire comment string; this is
 **   stripped from all lines.
 ** - Each empty line starts a new paragraph. All lines in a paragraph are merged
@@ -30,24 +33,30 @@ import proxy.adapters.MarkupRenderer;
 ** don't have to have to fit a list item on a single line; and you can indent it
 ** as you wish:
 **
+** ~~~~
 ** * This is a list item
 **   and this is still the same
 **   item as the previous lines
 ** * This is a new item
+** ~~~~
 **
 ** However, a more negative side effect is that you can't break up paragraphs with
 ** only a new entity (eg. an unordered list) - you must have an empty line to
 ** separate them, otherwise the pre-processor will concatenate the two lines and
 ** the rendering engine will see it as a single line. For example:
 **
+** ~~~~
 ** Lorem ipsum dolor sit amet.
 **
 ** * This is a list item
+** ~~~~
 **
 ** not
 **
+** ~~~~
 ** Lorem ipsum dolor sit amet.
 ** * This is a list item
+** ~~~~
 **
 ** I've done it this way because it seems more natural; if you think otherwise, or
 ** if you have a better algorithm than the one stated, feel free to contact me with
@@ -61,13 +70,12 @@ public class MediaWikiRenderer implements MarkupRenderer {
 	protected WikiModel wiki = new WikiModel("", "");
 
 	public String render(String text) {
-		String s = wiki.render(preprocessWikiString(text));
-		// strip <p> tags from single-line comments
-		return (s.lastIndexOf("<p>") == 1 && s.startsWith("\n<p>") && s.endsWith("</p>"))?
-		  "\n" + s.substring(4, s.length()-4): s;
+		return Markup.stripSingleP("\n<p>", "</p>", wiki.render(preprocessWikiString(text)));
 	}
 
 	public static String preprocessWikiString(String b) {
+		// TODO simplify this alg. don't need to work out indent any more
+
 		String lines[] = b.split("\\n");
 		int indent=Integer.MAX_VALUE;
 		// find smallest indent in the first 4 non-blank lines, excl the first line
