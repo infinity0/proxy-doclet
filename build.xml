@@ -59,6 +59,9 @@
 				<include name="standard/**/*"/>
 				<include name="internal/toolkit/AbstractDoclet.java"/>
 			</fileset>
+			<fileset dir="${main.src}">
+				<include name="**/*"/>
+			</fileset>
 		</copy>
 		<patch dir="${main.bsrc}" patchfile="proxy-doclet.diff" strip="1" />
 		<replace dir="${main.bsrc}/${src.home}" summary="true">
