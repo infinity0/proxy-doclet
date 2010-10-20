@@ -28,36 +28,38 @@ after all, is supposed to increase reusability and modularity.
 
 The major advantage with this approach is that it's very easy to add new
 features, such as support for different markup languages, and potentially add
-hooks to other parts of the operation of the doclet.
+hooks to other parts of the operation of the doclet, whilst maintaining a
+relatively distinct separation from the Standard Java Doclet source code.
 
-== Dependencies ==
+## Dependencies
 
 Put these in lib/:
 
 * bliki-core.jar http://code.google.com/p/gwtwiki/
 
-== Build ==
+## Build
 
-Java 6:
+The build script will automatically detect your version of Java and build
+against the appropriate version of the Standard Java Doclet using the source
+code in src.orig/ - so the following should work "out-of-the-box":
 
-$ ant -Djdk=6
+$ ant
 
-Java 7:
-
-$ ant -Djdk=7
-
-Custom path to Standard Java Doclet source files:
+If you want to specify a custom path to the source code:
 
 $ ant -Dsrc.orig=/path/to/source
 
-== Use ==
+(Note that in this case, you also need to have the full set of doclet-related
+classes in your classpath, version-compatible with your custom source code.)
+
+## Use
 
 Ant:
 
-<javadoc>
-	<doclet name="proxy.doclets.standard.Standard" path="path/to/proxy-doclet.jar"/>
-    <arg value="-J[FLAG]"/>
-</javadoc>
+	<javadoc>
+		<doclet name="proxy.doclets.standard.Standard" path="path/to/proxy-doclet.jar"/>
+		<arg value="-J[FLAG]"/>
+	</javadoc>
 
 [FLAG] can be something like "-Dproxy.adapters.markup=pandoc" if you want to
 pass environment variables or system properties to proxy-doclet.

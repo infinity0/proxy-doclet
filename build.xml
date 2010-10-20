@@ -22,12 +22,13 @@
 
 	<property name="doclet.package" value="proxy/doclets"/>
 	<condition property="doclet.orig" value="src.orig/openjdk-6-src-b16-24_apr_2009/">
-		<equals arg1="${jdk}" arg2="6"/></condition>
+		<equals arg1="${ant.java.version}" arg2="1.6"/></condition>
 	<condition property="doclet.orig" value="src.orig/openjdk-7-ea-src-b65-16_jul_2009/">
-		<equals arg1="${jdk}" arg2="7"/></condition>
+		<equals arg1="${ant.java.version}" arg2="1.7"/></condition>
 	<basename property="doclet.base" file="${doclet.orig}"/>
 	<dirname property="doclet.dir" file="${doclet.orig}"/>
 	<property name="doclet.home" value="${main.bsrc}/${doclet.package}"/>
+	<!--<echoproperties/>-->
 
 	<!-- =================================================================== -->
 	<!-- Miscellaneous                                                       -->
