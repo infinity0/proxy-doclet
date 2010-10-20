@@ -56,5 +56,9 @@ Ant:
 
 <javadoc>
 	<doclet name="proxy.doclets.standard.Standard" path="path/to/proxy-doclet.jar"/>
+    <arg value="-J[FLAG]"/>
 </javadoc>
+
+[FLAG] can be something like "-Dproxy.adapters.markup=pandoc" if you want to
+pass environment variables or system properties to proxy-doclet.
 

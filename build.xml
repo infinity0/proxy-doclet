@@ -28,7 +28,6 @@
 	<basename property="doclet.base" file="${doclet.orig}"/>
 	<dirname property="doclet.dir" file="${doclet.orig}"/>
 	<property name="doclet.home" value="${main.bsrc}/${doclet.package}"/>
-	<echoproperties/>
 
 	<!-- =================================================================== -->
 	<!-- Miscellaneous                                                       -->
@@ -121,6 +120,7 @@ dir=${doclet.dir}
 	<target name="javadoc" depends="init-doc, package">
 		<javadoc classpathref="lib.path" sourcepath="${main.src}" destdir="${doc.api}" use="true">
 			<doclet name="proxy.doclets.standard.Standard" path="${main.dst}/proxy-doclet+${doclet.base}.jar"/>
+			<arg value="-J-Dproxy.adapters.markup=${proxy.adapters.markup}"/>
 			<fileset dir="${main.src}" includes="**/*.java" />
 			<link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
 		</javadoc>

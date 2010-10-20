@@ -2,6 +2,12 @@ package proxy.adapters;
 
 import proxy.adapters.markup.*;
 
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.IOException;
+
 /**
 ** Static utility methods for markup-related adapters.
 **
@@ -9,23 +15,42 @@ import proxy.adapters.markup.*;
 */
 final public class Markup {
 
-	final private static MarkupRenderer renderer;
+	/**
+	** Default renderer. This is set from the {@code proxy.adapters.markup}
+	** system property, which can take the following values:
+	**
+	** - pre
+	** - pandoc (default)
+	** - mediawiki
+	**
+	** TODO add some more functionality
+	*/
+	final private static MarkupRenderer renderer = getDefaultRenderer();
 
 	private Markup() { }
 
-	static {
-		//renderer = new PreformatRenderer();
-		//renderer = new MediaWikiRenderer();
-		renderer = new PandocMarkdownRenderer();
+	private static MarkupRenderer getDefaultRenderer() {
+		String adapter = System.getProperty("proxy.adapters.markup");
+		// TODO use reflection
+
+		if (adapter == null) {
+			return new PandocMarkdownRenderer(); // default
+		} else if (adapter.equals("pre")) {
+			return new PreformatRenderer();
+		} else if (adapter.equals("pandoc")) {
+			return new PandocMarkdownRenderer();
+		} else if (adapter.equals("mediawiki")) {
+			return new MediaWikiRenderer();
+		} else {
+			return new PandocMarkdownRenderer(); // fallback
+		}
 	}
 
 	/**
-	** Render the given text using the system-wide renderer. This is obtained
-	** from the {@code proxy.adapters.markup} system property. TODO currently
-	** it assumes MediaWiki syntax.
+	** Render the given text using the {@link #renderer default renderer}.
 	*/
 	public static String render(String text) {
-		return renderer.render(deindent(text));
+		return renderer.render(dedent(text));
 	}
 
 	/**
@@ -57,34 +82,57 @@ final public class Markup {
 	** that spans several lines.
 	** ~~~~
 	*/
-	public static String deindent(String text) {
-		// TODO make this more efficient
+	public static String dedent(String text) {
+		try {
+			StringReader in = new StringReader(text);
+			BufferedReader rd = new BufferedReader(in);
+			in.mark(Integer.MAX_VALUE);
 
-		String lines[] = text.split("\\n");
-		int indent=Integer.MAX_VALUE;
-		// find smallest indent in the first 4 non-blank lines, excl the first line
-		// whose indent is discarded by javadoc
-		for (int i=1, l=0; i<lines.length && l<4; ++i) {
-			int j=-1;
-			while (++j < lines[i].length() && lines[i].charAt(j) == ' ');
-			if (j == lines[i].length()) { continue; }
-			if (j < indent) { indent = j; }
-			++l;
+			String line = rd.readLine(); // skip first line, Standard Java Doclet has already stripped it
+			int indent=Integer.MAX_VALUE, i = 0;
+
+			// guess intended indent from first 4 non-blank lines
+			for (line=rd.readLine(); line!=null && i<4; line=rd.readLine(), ++i) {
+				int j = getIndent(line);
+				if (j == line.length()) { continue; }
+				if (j < indent) { indent = j; }
+			}
+
+			StringWriter str = new StringWriter(text.length());
+			PrintWriter out = new PrintWriter(str);
+			rd = new BufferedReader(in);
+			in.reset();
+
+			// dedent all lines
+			for (line=rd.readLine(); line!=null; line=rd.readLine()) {
+				int j = getIndent(line);
+				out.println(line.substring(indent > j? j: indent)); // strip the indent (or smaller) from each line
+			}
+			return str.toString();
+
+		} catch (IOException e) {
+			throw new AssertionError();
 		}
-
-		StringBuffer result = new StringBuffer();
-		for (int i=0; i<lines.length; ++i) {
-			int j=-1;
-			while (++j < lines[i].length() && lines[i].charAt(j) == ' ');
-			// strip the indent (or smaller) from each line
-			result.append(lines[i].substring(indent > j? j: indent)).append('\n');
-		}
-		return result.toString();
-
 	}
 
 	/**
-	** Strips {@code p} tags from single-line comments, such as those
+	** Return the number of consecutive characters prefixing a line.
+	*/
+	public static int getIndent(String line, char ic) {
+		int j=-1;
+		while (++j < line.length() && line.charAt(j) == ic);
+		return j;
+	}
+
+	/**
+	** Return the number of consecutive spaces prefixing a line.
+	*/
+	public static int getIndent(String line) {
+		return getIndent(line, ' ');
+	}
+
+	/**
+	** Strip {@code p} tags from single-line comments, such as those
 	** used in the method summary table.
 	**
 	** @param ppre The exact form of {@code <p>} that is rendered (e.g. {@code "<P>\n"})

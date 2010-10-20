@@ -74,48 +74,43 @@ public class MediaWikiRenderer implements MarkupRenderer {
 	}
 
 	public static String preprocessWikiString(String b) {
-		// TODO simplify this alg. don't need to work out indent any more
-
 		String lines[] = b.split("\\n");
-		int indent=Integer.MAX_VALUE;
-		// find smallest indent in the first 4 non-blank lines, excl the first line
-		// whose indent is discarded by javadoc
-		for (int i=1, l=0; i<lines.length && l<4; ++i) {
-			int j=-1;
-			while (++j < lines[i].length() && lines[i].charAt(j) == ' ');
-			if (j == lines[i].length()) { continue; }
-			if (j < indent) { indent = j; }
-			++l;
-		}
-		boolean startedtext = false;
-		boolean startparagraph = true;
-		char firstchar = 0;
 		StringBuffer result = new StringBuffer();
+		boolean startedtext = false;
+		boolean startblock = true;
+
+		// blocktype ' ' : preformatted block
+		// blocktype '\0' : normal paragraph
+		// blocktype <symbol> : <symbol> type (e.g. * == ul, # == li)
+		char blocktype = 0;
+
+
 		// selectively merge lines into paragraphs
-		for (int i=0; i<lines.length; ++i) {
-			int j=-1;
-			while (++j < lines[i].length() && lines[i].charAt(j) == ' ');
-			if (j == lines[i].length()) {
+		for (String line: lines) {
+			int j = Markup.getIndent(line);
+			char firstchar = line.charAt(0);
+
+			if (j == line.length()) {
 				// if we haven't seen text yet, skip the entire line
 				if (!startedtext) { continue; }
 				// if line is empty, start a new paragraph
 				result.append('\n').append('\n');
-				startparagraph = true;
+				startblock = true;
 				continue;
-			} else if (startparagraph) {
-				// determine the automatic line-merge setting from the first character of
-				// each paragraph
-				startparagraph = false;
-				firstchar = (j > indent)? ' ': Character.isLetter(lines[i].charAt(j))? 0: lines[i].charAt(j);
-			} else if (lines[i].charAt(indent > j? j: indent) == firstchar) {
-				// if firstchar is ' ', start a new line on ' '
-				// if firstchar is a letter, start a new line on \0 (effectively never)
-				// if firstchar is a symbol, start a new line on that same symbol
+
+			} else if (startblock) {
+				// determine the automatic line-merge setting from the first character of each paragraph
+				startblock = false;
+				blocktype = Character.isLetter(firstchar)? 0: firstchar;
+
+			} else if (firstchar == blocktype) {
+				// start a new line when blocktype matches firstchar
+				// when blocktype == '\0' for a normal paragraph this is effectively never
 				result.append('\n');
 			}
+
 			startedtext = true;
-			// strip the indent (or smaller) from each line
-			result.append(lines[i].substring(firstchar != ' '? j: indent > j? j: indent)).append(' ');
+			result.append(line).append(' ');
 		}
 		return result.toString();
 	}
