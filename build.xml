@@ -27,6 +27,8 @@
 		<equals arg1="${jdk}" arg2="7"/></condition>
 	<basename property="doclet.base" file="${doclet.orig}"/>
 	<dirname property="doclet.dir" file="${doclet.orig}"/>
+	<property name="doclet.home" value="${main.bsrc}/${doclet.package}"/>
+	<echoproperties/>
 
 	<!-- =================================================================== -->
 	<!-- Miscellaneous                                                       -->
@@ -48,31 +50,34 @@
 		<mkdir dir="${main.dst}"/>
 	</target>
 
-	<target name="build-src" depends="init" description="build the source code for the entire package">
-		<property name="doclet.home" value="${main.bsrc}/${doclet.package}"/>
-		<delete dir="${doclet.home}"/>
-		<mkdir dir="${doclet.home}"/>
-		<copy todir="${doclet.home}">
-			<fileset dir="${doclet.orig}/com/sun/tools/doclets/">
+	<target name="check-src">
+		<uptodate property="doclet.skip" targetfile="${doclet.home}/src.properties">
+			<srcfiles dir="${doclet.orig}/com/sun/tools/doclets/" id="doclet.src">
 				<include name="formats/**/*"/>
 				<include name="standard/**/*"/>
 				<include name="internal/toolkit/AbstractDoclet.java"/>
-			</fileset>
-		</copy>
+			</srcfiles>
+			<srcfiles file="proxy-doclet.diff"/>
+		</uptodate>
+	</target>
+
+	<target name="build-src" depends="init, check-src" description="build the source code for the entire package" unless="${doclet.skip}">
+		<delete dir="${doclet.home}"/>
+		<mkdir dir="${doclet.home}"/>
+		<copy todir="${doclet.home}"><fileset refid="doclet.src"/></copy>
 		<patch dir="${doclet.home}" patchfile="proxy-doclet.diff" strip="0" />
 		<replace dir="${doclet.home}" summary="true">
 			<replacefilter token="com.sun.tools.doclets.formats" value="proxy.doclets.formats"/>
 			<replacefilter token="com.sun.tools.doclets.standard" value="proxy.doclets.standard"/>
 			<replacefilter token="proxy.doclets.formats.html.resources.standard" value="com.sun.tools.doclets.formats.html.resources.standard"/>
 		</replace>
-		<tstamp>
-			<format property="src.tstamp" pattern="yyyy-MM-dd HH:mm:ssZ"/>
-		</tstamp>
-		<echo file="${doclet.home}/src.properties"># Source automatically generated from ${doclet.orig}${line.separator}</echo>
-		<echo file="${doclet.home}/src.properties" append="true"># by proxy-doclet.build-src on ${src.tstamp}${line.separator}</echo>
-		<echo file="${doclet.home}/src.properties" append="true">path=${doclet.orig}${line.separator}</echo>
-		<echo file="${doclet.home}/src.properties" append="true">base=${doclet.base}${line.separator}</echo>
-		<echo file="${doclet.home}/src.properties" append="true">dir=${doclet.dir}${line.separator}</echo>
+		<tstamp><format property="doclet.tstamp" pattern="yyyy-MM-dd HH:mm:ssZ"/></tstamp>
+		<echo file="${doclet.home}/src.properties"># Source automatically generated from ${doclet.orig}
+# by ${ant.project.name}.build-src on ${doclet.tstamp}
+path=${doclet.orig}
+base=${doclet.base}
+dir=${doclet.dir}
+</echo>
 	</target>
 
 	<target name="build" depends="build-src">
