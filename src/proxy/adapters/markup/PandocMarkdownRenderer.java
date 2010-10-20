@@ -23,8 +23,8 @@ public class PandocMarkdownRenderer implements MarkupRenderer {
 	public String render(String text) {
 		Process proc = null;
 		try {
-
 			proc = Runtime.getRuntime().exec(new String[]{"pandoc"});
+
 			OutputStream out = proc.getOutputStream();
 			new PrintStream(out).print(text);
 			out.close();

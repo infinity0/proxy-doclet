@@ -132,12 +132,14 @@ final public class Markup {
 	}
 
 	/**
-	** Strip {@code p} tags from single-line comments, such as those
-	** used in the method summary table.
+	** Strip {@code p} tags from single-line comments, such as those used in the
+	** method summary table.
 	**
-	** @param ppre The exact form of {@code <p>} that is rendered (e.g. {@code "<P>\n"})
-	** @param psuf The exact form of {@code </p>} that is rendered (e.g. {@code "</P>\n"})
-	** @param s The string to strip, if appropriate.
+	** @param ppre The exact form of {@code <p>} that is rendered (e.g. {@code
+	**        "<P>\n"}). This will be removed from the start of the string.
+	** @param psuf The exact form of {@code </p>} that is rendered (e.g. {@code
+	**        "</P>\n"}). This will be removed from the end of the string.
+	** @param s The string to strip if appropriate.
 	*/
 	public static String stripSingleP(String ppre, String psuf, String s) {
 		return (s.lastIndexOf(ppre) == 0 && s.endsWith(psuf))? s.substring(ppre.length(), s.length()-psuf.length()): s;

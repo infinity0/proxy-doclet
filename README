@@ -14,7 +14,7 @@ So far, the supported hooks are:
 and the supported actions are:
 
 - parse the text as MediaWiki markup
-- parse the text as pandoc markdown (TODO)
+- parse the text as pandoc markdown
 
 I originally wanted a doclet that could allow me to use MediaWiki syntax in
 javadoc comments, because having to type <p> everywhere is tedious and ugly.
@@ -31,11 +31,17 @@ features, such as support for different markup languages, and potentially add
 hooks to other parts of the operation of the doclet, whilst maintaining a
 relatively distinct separation from the Standard Java Doclet source code.
 
+
 ## Dependencies
 
 Put these in lib/:
 
 * bliki-core.jar http://code.google.com/p/gwtwiki/
+
+Install these programs:
+
+* pandoc http://johnmacfarlane.net/pandoc/
+
 
 ## Build
 
