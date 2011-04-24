@@ -64,9 +64,18 @@ Ant:
 
 	<javadoc>
 		<doclet name="proxy.doclets.standard.Standard" path="path/to/proxy-doclet.jar"/>
-		<arg value="-J[FLAG]"/>
+		<arg value="[FLAG]"/>
+		<arg value="-J-D[KEY]=[VALUE]"/>
 	</javadoc>
 
-[FLAG] can be something like "-Dproxy.adapters.markup=pandoc" if you want to
-pass environment variables or system properties to proxy-doclet.
+[FLAG] takes all the values that the standard doclet takes (`javadoc -help`).
 
+[KEY] is a java system property name. proxy-doclet uses the following:
+
+proxy.adapters.markup={pre|pandoc*|mediawiki} *default
+	indicates the proxy to use
+proxy.adapters.pandoc.cmdline=*
+	space-separated string to execute as pandoc command. you can escape the
+	spaces with \; double-escaping (\\ -> \) also works correctly.
+proxy.doclets.keeptabs={true|false}
+	whether to keep tabs in the source code

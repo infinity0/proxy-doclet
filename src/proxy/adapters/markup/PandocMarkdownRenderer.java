@@ -23,7 +23,13 @@ public class PandocMarkdownRenderer implements MarkupRenderer {
 	public String render(String text) {
 		Process proc = null;
 		try {
-			proc = Runtime.getRuntime().exec(new String[]{"pandoc"});
+			// splits at " " with escapes
+			// simple negative lookbehind .split("(?<!\\\\) ") doesn't work;
+			// it can't handle double-escapes and doesn't replace \\ with \
+			String[] args = System.getProperty("proxy.adapters.pandoc.cmdline", "pandoc")
+			  .replaceAll("(?<!\\\\)((?:\\\\\\\\)*) ", "$1\u0000")
+			  .replace("\\ "," ").replace("\\\\","\\").split("\\00");
+			proc = Runtime.getRuntime().exec(args);
 
 			OutputStream out = proc.getOutputStream();
 			new PrintStream(out).print(text);
